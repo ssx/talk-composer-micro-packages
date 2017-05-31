@@ -4,7 +4,7 @@
 	<head>
 		<meta charset="utf-8">
 
-		<title>Talk Title</title>
+		<title>Composer Micro Packages</title>
 
 		<meta name="description" content="A brief talk title here.">
 		<meta name="author" content="Scott Wilcox">
@@ -46,48 +46,243 @@
 
 			<!-- Any section element inside of this container is displayed as a slide -->
 			<div class="slides">
-				<section>
-					<h2>Talk Title <i class="fa fa-fw fa-star"></i></h2>
-					<h4>Subtitle goes here.</h4>
-				</section>
-
-				<section data-markdown>
-					  ## I'm written in Markdown
-
-					  Write content using inline or external Markdown.
-					  Instructions and more info available in the [readme](https://github.com/hakimel/reveal.js#markdown).
+				<section style="text-align: center;">
+					<h2>
+						Micro Packages <i class="fa fa-fw fa-cubes"></i><br>
+						Using Composer
+					</h2>
+					<h4>Splitting functionality into smaller, easier and installable packages.</h4>
 				</section>
 
 				<section>
-					<h2>Pretty Code</h2>
+
+					<h2>Scenario</h2>
+
+					<p>We have an application that contains a set of banks, which all
+						share common functionality. We'll write an interface for the bank,
+						what it should do and then seperate each bank out into its own
+						package.</p>
+
+				</section>
+
+				<section>
+					<h2>The Bank Interface</h2>
+					<p>Our bank implementations can create a bank with a balance, perform
+						a deposit, perform a withdraw and find the interest rate.</p>
+
 					<pre><code class="hljs" data-trim contenteditable>
-function linkify( selector ) {
-  if( supports3DTransforms ) {
+						&lt?php
 
-    var nodes = document.querySelectorAll( selector );
-  }
-}
+						namespace Banking\Interfaces;
+
+						interface BankInterface {
+
+						    public function __construct($balance);
+
+						    public function deposit($pence) : int;
+
+						    public function withdraw($pence) : int;
+
+						    public function getInterestRate();
+						}
 					</code></pre>
-					<p>Code syntax highlighting courtesy of <a href="http://softwaremaniacs.org/soft/highlight/en/description/">highlight.js</a>.</p>
+				</section>
+
+
+				<section>
+					<h2>composer.json</h2>
+					<p>We'll need to tell Composer where to find our newly written class.</p>
+					<pre><code class="hljs" data-trim contenteditable>
+						{
+						  "name": "ssx/cmp-interfaces",
+						  "description": "Base interfaces for example talk",
+						  "type": "project",
+						  "license": "Apache2.0",
+						  "minimum-stability": "stable",
+						  "require": {},
+						  "require-dev": {
+						    "phpunit/phpunit": "^6"
+						  },
+						  "autoload": {
+						    "psr-4": {
+						      "Banking\\Interfaces\\": "src/"
+						    }
+						  }
+						}
+					</code></pre>
 				</section>
 
 				<section>
-					<h2>Clever Quotes</h2>
-					<blockquote cite="http://searchservervirtualization.techtarget.com/definition/Our-Favorite-Technology-Quotations">
-						&ldquo;For years there has been a theory that millions of monkeys typing at random on millions of typewriters would
-						reproduce the entire works of Shakespeare. The Internet has proven this theory to be untrue.&rdquo;
-					</blockquote>
+					<h2>Layout of our Interface Package</h2>
+					<img src="interfaces.png">
 				</section>
 
 				<section>
-					<h2>Speaker View</h2>
-					<p>There's a <a href="https://github.com/hakimel/reveal.js#speaker-notes">speaker view</a>. It includes a timer, preview of the upcoming slide as well as your speaker notes.</p>
-					<p>Press the <em>S</em> key to try it out.</p>
+					<h2>Commit, tag, push</h2>
+					<p>Now our interface package is complete, commit it and tag a version.</p>
+					<pre><code class="hljs" data-trim contenteditable>
+						# Add files
+						git add . && git commit -am "Initial Commit"
 
-					<aside class="notes">
-						Oh hey, these are some notes. They'll be hidden in your presentation, but you can see them if you open the speaker notes window (hit 's' on your keyboard).
-					</aside>
+						# Create a tag
+						git tag 1.0.0
+
+						# Push commits and tags to remote
+						git push && git push --tags
+					</code></pre>
 				</section>
+
+				<section>
+						<h2>Pushed to Github</h2>
+						<img src="interface_github.png">
+				</section>
+
+				<section>
+						<h2>Pushed to Github</h2>
+						<p>The base package we'll work with now is <a>ssx/cmp-interfaces</a> at version <a>1.0.0</a>. This isn't on composer, so we'll manually add the repo to our composer.json.</p>
+				</section>
+
+				<section>
+						<h2>Implementation Time</h2>
+						<i class="fa fa-fw fa-4x fa-star fa-spin"></i>
+				</section>
+
+				<section>
+						<h2>Create composer.json of our implementation</h2>
+						<pre><code class="hljs" data-trim contenteditable>
+							{
+							  "name": "ssx/cmp-natwest",
+							  "description": "A sample bank for a sample talk.",
+							  "type": "project",
+							  "license": "Apache2.0",
+							  "authors": [
+							    {
+							      "name": "Scott Wilcox",
+							      "email": "scott@dor.ky"
+							    }
+							  ],
+							  "minimum-stability": "stable",
+							  "require": {
+							    "ssx/cmp-interfaces": "^1.0.0"
+							  },
+							  "require-dev": {
+							    "phpunit/phpunit": "^6"
+							  },
+							  "autoload": {
+							    "psr-4": {
+							      "Banking\\Banks\\": "src/"
+							    }
+							  },
+							  "repositories": [
+							    {
+							      "type": "git",
+							      "url":  "git@github.com:ssx/cmp-interfaces.git"
+							    }
+							  ]
+							}
+						</code></pre>
+				</section>
+
+				<section>
+					<h2>Require our base interfaces package</h2>
+					<img src="implement_1_require.png">
+				</section>
+
+				<section>
+					<h2>PHPUnit to run tests</h2>
+					<img src="implement_2_requiredev.png">
+				</section>
+
+				<section>
+					<h2>PSR 4 Autoload our implementation</h2>
+					<img src="implement_3_autoload.png">
+				</section>
+
+				<section>
+					<h2>Add our Github URL as a repo</h2>
+					<img src="implement_4_repos.png">
+				</section>
+
+				<section>
+					<h2>Warning <i class="fa fa-fw fa-warning"></i></h2>
+					<p>There are multiple ways to load git repos into your composer based project,
+						some don't always autoload dependencies classes and will cause you issues.
+						This was the most reliable method of the ones I tested that worked
+						exactly and autoloaded dependencies of my dependencies.</p>
+				</section>
+
+				<section>
+						<h2>BarclaysBank Implementation</h2>
+						<script src="https://gist.github.com/ssx/c299a9e18f71dd8fae8e6fda4a23f499.js"></script>
+				</section>
+
+				<section>
+					<h2>Layout of Our Implementation</h2>
+					<img src="package_barclays.png">
+				</section>
+
+				<section>
+					<h2>A simple test and check</h2>
+					<script src="https://gist.github.com/ssx/5a1b2f5375c4add21b5622a3defce7b0.js"></script>
+				</section>
+
+				<section>
+					<h2>Run the test</h2>
+					<img src="phpunit_barclays.png">
+				</section>
+
+				<section>
+					<h2>Add, Commit, Tag, Push</h2>
+					<pre><code class="hljs" data-trim contenteditable>
+						# Add files
+						git add . && git commit -am "Initial Commit"
+
+						# Create a tag
+						git tag 1.0.2
+
+						# Push commits and tags to remote
+						git push && git push --tags
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Add Natwest as well</h2>
+					<p>Don't worry, I won't waste your time showing you that again.</p>
+				</section>
+
+				<section>
+					<h2>Final Boss Screen</h2>
+
+					<p>We're going to create <strong>cmp-app</strong> now, which is our final
+						application. Here's the composer.json:</p>
+
+						<div style="zoom: 0.75">
+							<script src="https://gist.github.com/ssx/d9c5b70a23afe16a03da98a440a9014f.js"></script>
+						</div>
+				</section>
+
+				<section>
+					<h2>Dirt Simple App</h2>
+					<p>Let's build a simple test file that will get the interest rate for each Bank.</p>
+
+					<script src="https://gist.github.com/ssx/262085ce555baa273fd1489746da4e3a.js"></script>
+
+				</section>
+
+
+				<section>
+					<h2>Further Along the Road</h2>
+
+					<p>If this was a serious app, you would have a Manager class which
+						would handle the adding/removing of each Bank so the system is aware
+						of what is present. An example of this <strong>Laravel's</strong>
+						registering boot providers.</p>
+
+						<p>You can do it with reflection to determine all the classes
+							within a namespace, but that's pretty hacky.</p>
+				</section>
+
+			
 
 				<section style="text-align: left;">
 					<h2>END.</h2>
